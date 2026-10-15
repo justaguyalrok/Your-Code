@@ -1,4 +1,10 @@
 <!DOCTYPE html>
+<!--
+  GitHub Pages deployment note:
+  This is a static frontend. Do not place Gemini/OpenRouter secret API keys here.
+  AI requests require a backend/proxy that keeps API keys private.
+-->
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -334,9 +340,9 @@
     // ============================================================
     // CONFIG — API Keys & Endpoints
     // ============================================================
-    const GEMINI_API_KEY = "AQ.Ab8RN6K6oxXEhlWDwfIsBPmQdo5VooCiP6_x29xscjkkn3bzaQ";
+    const GEMINI_API_KEY = ""; // Configure securely through a backend; do not put API keys in public HTML.
 
-    const OPENROUTER_API_KEY = "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";
+    const OPENROUTER_API_KEY = ""; // Configure securely through a backend; do not put API keys in public HTML.
     const OPENROUTER_URL     = "https://openrouter.ai/api/v1/chat/completions";
     const GEMINI_CHAT_URL_BASE = "https://generativelanguage.googleapis.com/v1/models";
     const GEMINI_CHAT_URL_BASE_BETA = "https://generativelanguage.googleapis.com/v1beta/models";
