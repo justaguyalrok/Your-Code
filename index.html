@@ -1,1 +1,1096 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Code</title>
+    <!-- Tailwind Play CDN — the console warning is advisory only and does not affect functionality -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.2/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .dark-scrollbar::-webkit-scrollbar-thumb { background: #475569; }
+        .dark-scrollbar::-webkit-scrollbar-thumb:hover { background: #64748b; }
 
+        .typing-indicator span {
+            display: inline-block; width: 6px; height: 6px;
+            background-color: #6366f1; border-radius: 50%; margin: 0 2px;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+
+        .markdown-body p { margin-bottom: 0.75em; line-height: 1.625; }
+        .markdown-body pre {
+            background: #0f172a; color: #e2e8f0; padding: 1.25rem;
+            border-radius: 0.75rem; overflow-x: auto; margin: 0.75em 0;
+            border: 1px solid #334155; position: relative;
+        }
+        .markdown-body code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            background: #f1f5f9; color: #ef4444;
+            padding: 0.2em 0.4em; border-radius: 0.375rem; font-size: 0.875em;
+        }
+        .markdown-body pre code { background: transparent; padding: 0; color: #e2e8f0; font-size: 0.875rem; }
+        .markdown-body ul { list-style-type: disc; margin-left: 1.75em; margin-bottom: 0.75em; }
+        .markdown-body ol { list-style-type: decimal; margin-left: 1.75em; margin-bottom: 0.75em; }
+        .markdown-body a { color: #4f46e5; text-decoration: underline; font-weight: 500; }
+        .markdown-body h1, .markdown-body h2, .markdown-body h3 {
+            font-weight: 700; color: #0f172a; margin-top: 1.25em; margin-bottom: 0.5em;
+        }
+        .markdown-body h1 { font-size: 1.5em; }
+        .markdown-body h2 { font-size: 1.25em; }
+        .markdown-body h3 { font-size: 1.1em; }
+        .markdown-body blockquote {
+            border-left: 4px solid #6366f1; padding-left: 1rem;
+            color: #475569; font-style: italic; margin: 1rem 0;
+        }
+        .markdown-body table { border-collapse: collapse; width: 100%; margin-bottom: 0.75em; }
+        .markdown-body th, .markdown-body td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; }
+        .markdown-body th { background: #f8fafc; font-weight: 600; }
+
+        .typing-caret::after {
+            content: '▊'; display: inline-block; margin-left: 4px;
+            color: #6366f1; animation: blink 0.8s infinite;
+        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        input[type="range"] { accent-color: #6366f1; }
+
+        /* Thinking section collapsible */
+        .thinking-section .thinking-content { display: none; }
+        .thinking-section.thinking-open .thinking-content { display: block; }
+        .thinking-section.thinking-open .thinking-chevron { transform: rotate(180deg); }
+        .thinking-toggle { user-select: none; }
+    </style>
+</head>
+<body class="bg-slate-50 h-screen flex font-sans text-slate-800 antialiased overflow-hidden selection:bg-indigo-100 selection:text-indigo-900">
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="w-72 bg-slate-900 text-slate-100 flex flex-col transition-all duration-300 transform -translate-x-full md:translate-x-0 absolute md:relative z-30 h-full border-r border-slate-800 shadow-xl">
+        <div class="p-4 border-b border-slate-800 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="relative w-10 h-10 flex items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 shadow-md">
+                    <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M8 12C8 9.79086 9.79086 8 12 8C14.2091 8 16 9.79086 16 12C16 14.2091 14.2091 16 12 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M12 16V20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    <span class="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full border-2 border-slate-900 animate-pulse"></span>
+                </div>
+                <div>
+                    <span class="font-extrabold text-xl bg-gradient-to-r from-white via-indigo-200 to-slate-200 bg-clip-text text-transparent tracking-tight">Your Code</span>
+                    <span class="block text-[9px] text-indigo-400 font-bold tracking-widest uppercase">Multi-Provider Playground</span>
+                </div>
+            </div>
+            <button id="close-sidebar-btn" class="md:hidden p-1 hover:bg-slate-800 rounded-lg text-slate-400">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <div class="p-3">
+            <button id="new-chat-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl py-2.5 px-4 flex items-center justify-center gap-2 transition-all duration-200 font-semibold text-sm">
+                <i data-lucide="plus-circle" class="w-4 h-4"></i>New Chat
+            </button>
+        </div>
+
+        <div class="px-4 py-2 text-[11px] font-bold text-slate-400 tracking-wider uppercase">Active Dialogues</div>
+
+        <div class="flex-1 overflow-y-auto px-2 pb-4 space-y-1 dark-scrollbar" id="history-list"></div>
+
+        <div class="p-4 border-t border-slate-800 bg-slate-950/40 space-y-3">
+            <div class="flex items-center justify-between text-xs text-slate-400">
+                <span>System status</span>
+                <span class="flex items-center gap-1.5 text-emerald-400 font-semibold">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>Operational
+                </span>
+            </div>
+            <div id="sidebar-profile-card" class="flex items-center gap-3 bg-slate-800/50 p-3 rounded-xl border border-slate-800">
+                <div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-indigo-400 font-bold text-xs uppercase" id="user-avatar-initials">G</div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-xs font-semibold text-white truncate" id="user-display-name">Guest</p>
+                    <p class="text-[10px] text-slate-400 truncate" id="user-display-status">Local Workspace</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <div id="sidebar-overlay" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-20 hidden md:hidden"></div>
+
+    <!-- Main -->
+    <div class="flex-1 flex flex-col h-full min-w-0 relative bg-slate-50">
+        <header class="bg-white/80 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-10 px-4 py-3">
+            <div class="max-w-4xl mx-auto flex items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <button id="menu-btn" class="md:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-xl transition-colors">
+                        <i data-lucide="menu" class="w-5 h-5"></i>
+                    </button>
+                    <div>
+                        <h1 class="text-base font-extrabold text-slate-900 tracking-tight">Your Code</h1>
+                        <p class="text-[10px] text-indigo-600 flex items-center gap-1.5 font-semibold">
+                            <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                            <span id="active-provider-label">Gemini & OpenRouter</span>
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="relative" id="model-dropdown-wrapper">
+                        <button id="model-dropdown-btn" class="bg-slate-100 border border-slate-200 text-slate-700 text-xs sm:text-sm rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2 py-1.5 cursor-pointer font-semibold transition-all flex items-center gap-2 whitespace-nowrap min-w-[180px]">
+                            <span class="flex-1 text-left truncate" id="model-dropdown-label">🔮 OpenRouter Free</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 flex-shrink-0 transition-transform duration-200" id="model-dropdown-chevron"></i>
+                        </button>
+                        <div id="model-dropdown-list" class="absolute right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 hidden min-w-full max-w-md" style="max-height:600px;overflow-y:auto;">
+                            <div class="p-1.5">
+                                <div class="px-3 py-1.5 text-[10px] font-bold text-indigo-600 uppercase tracking-wider">Gemini — Chat</div>
+                                <div class="model-option cursor-pointer px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors flex items-center gap-2" data-value="gemini-3-flash-preview">🌀 Gemini 3.0 Flash</div>
+                                <div class="model-option cursor-pointer px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors flex items-center gap-2" data-value="gemini-2.5-flash">🌀 Gemini 2.5 Flash</div>
+                                <div class="model-option cursor-pointer px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors flex items-center gap-2" data-value="gemini-3.1-lite">🌀 Gemini 3.1 Lite Flash</div>
+                                <div class="border-t border-slate-100 my-1"></div>
+                                <div class="px-3 py-1.5 text-[10px] font-bold text-indigo-600 uppercase tracking-wider">OpenRouter — Free Models</div>
+                                <div class="model-option cursor-pointer px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors flex items-center gap-2" data-value="or-openrouter-free">🔮 OpenRouter Free</div>
+                                <div class="model-option cursor-pointer px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors flex items-center gap-2" data-value="or-gpt-oss-20b">🔮 GPT OSS 20B</div>
+                                <div class="model-option cursor-pointer px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors flex items-center gap-2" data-value="or-gpt-oss-120b">🔮 GPT OSS 120B</div>
+                                <div class="model-option cursor-pointer px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors flex items-center gap-2" data-value="or-qwen3-next">🔮 Qwen 3 Next 80B A3B</div>
+                                <div class="model-option cursor-pointer px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors flex items-center gap-2" data-value="or-nemotron-ultra">🔮 Nemotron 3 Ultra 550B</div>
+                                <div class="model-option cursor-pointer px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors flex items-center gap-2" data-value="or-nemotron-nano">🔮 Nemotron 3 Nano 30B</div>
+                                <div class="model-option cursor-pointer px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors flex items-center gap-2" data-value="or-nemotron-super">🔮 Nemotron 3 Super 120B A12B</div>
+                                <div class="model-option cursor-pointer px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors flex items-center gap-2" data-value="or-gemma-4">🔮 Gemma 4 26B A4B</div>
+                                <div class="model-option cursor-pointer px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors flex items-center gap-2" data-value="or-gemma-4-31b">🔮 Gemma 4 31B IT</div>
+                                <div class="model-option cursor-pointer px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors flex items-center gap-2" data-value="or-hermes-405b">🔮 Hermes 3 405B</div>
+                                <div class="model-option cursor-pointer px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors flex items-center gap-2" data-value="or-lfm-thinking">🔮 LFM 2.5 1.2B Thinking</div>
+                                <div class="model-option cursor-pointer px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors flex items-center gap-2" data-value="or-lfm-instruct">🔮 LFM 2.5 1.2B Instruct</div>
+                                <div class="model-option cursor-pointer px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors flex items-center gap-2" data-value="or-north-mini-code">🔮 North Mini Code</div>
+                                <div class="model-option cursor-pointer px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors flex items-center gap-2" data-value="or-llama-70b">🔮 Llama 3.3 70B Instruct</div>
+                                <div class="model-option cursor-pointer px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors flex items-center gap-2" data-value="or-poolside-laguna-xs2">🏊 Poolside Laguna XS.2</div>
+                                <div class="model-option cursor-pointer px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors flex items-center gap-2" data-value="or-poolside-laguna-m1">🏊 Poolside Laguna M.1</div>
+                                <div class="model-option cursor-pointer px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors flex items-center gap-2" data-value="or-nemotron-3-nano-30b-a3b">🤖 Nemotron 3 Nano 30B A3B</div>
+                                <div class="model-option cursor-pointer px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors flex items-center gap-2" data-value="or-nemotron-embed-vl-1b-v2">🔷 Llama Nemotron Embed VL 1B V2</div>
+                                <div class="model-option cursor-pointer px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors flex items-center gap-2" data-value="or-nemotron-nano-12b-v2-vl">🔷 Nemotron Nano 12B V2 VL</div>
+                                <div class="model-option cursor-pointer px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors flex items-center gap-2" data-value="or-nemotron-nano-9b-v2">🔷 Nemotron Nano 9B V2</div>
+                                <div class="model-option cursor-pointer px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors flex items-center gap-2" data-value="or-llama-3.2-3b-instruct">🦙 Llama 3.2 3B Instruct</div>
+                            </div>
+                        </div>
+                    </div>
+                    <select id="model-selector" class="hidden" aria-hidden="true">
+                        <option value="gemini-3-flash-preview">🌀 Gemini 3.0 Flash</option>
+                        <option value="gemini-2.5-flash">🌀 Gemini 2.5 Flash</option>
+                        <option value="gemini-3.1-lite">🌀 Gemini 3.1 Lite Flash</option>
+                        <option value="or-openrouter-free" selected>🔮 OpenRouter Free</option>
+                        <option value="or-gpt-oss-20b">🔮 GPT OSS 20B</option>
+                        <option value="or-gpt-oss-120b">🔮 GPT OSS 120B</option>
+                        <option value="or-qwen3-next">🔮 Qwen 3 Next 80B A3B</option>
+                        <option value="or-nemotron-ultra">🔮 Nemotron 3 Ultra 550B</option>
+                        <option value="or-nemotron-nano">🔮 Nemotron 3 Nano 30B</option>
+                        <option value="or-nemotron-super">🔮 Nemotron 3 Super 120B A12B</option>
+                        <option value="or-gemma-4">🔮 Gemma 4 26B A4B</option>
+                        <option value="or-gemma-4-31b">🔮 Gemma 4 31B IT</option>
+                        <option value="or-hermes-405b">🔮 Hermes 3 405B</option>
+                        <option value="or-lfm-thinking">🔮 LFM 2.5 1.2B Thinking</option>
+                        <option value="or-lfm-instruct">🔮 LFM 2.5 1.2B Instruct</option>
+                        <option value="or-north-mini-code">🔮 North Mini Code</option>
+                        <option value="or-llama-70b">🔮 Llama 3.3 70B Instruct</option>
+                        <option value="or-poolside-laguna-xs2">🏊 Poolside Laguna XS.2</option>
+                        <option value="or-poolside-laguna-m1">🏊 Poolside Laguna M.1</option>
+                        <option value="or-nemotron-3-nano-30b-a3b">🤖 Nemotron 3 Nano 30B A3B</option>
+                        <option value="or-nemotron-embed-vl-1b-v2">🔷 Llama Nemotron Embed VL 1B V2</option>
+                        <option value="or-nemotron-nano-12b-v2-vl">🔷 Nemotron Nano 12B V2 VL</option>
+                        <option value="or-nemotron-nano-9b-v2">🔷 Nemotron Nano 9B V2</option>
+                        <option value="or-llama-3.2-3b-instruct">🦙 Llama 3.2 3B Instruct</option>
+                    </select>
+                    <button id="settings-toggle-btn" class="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition-all">
+                        <i data-lucide="settings" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-1 overflow-y-auto p-4 w-full max-w-4xl mx-auto flex flex-col gap-4" id="chat-box"></main>
+
+        <div id="loading-indicator" class="hidden w-full max-w-4xl mx-auto px-4 pb-4">
+            <div class="flex gap-4 w-full max-w-3xl">
+                <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-500 flex-shrink-0 flex items-center justify-center text-white text-xs font-bold shadow-sm">
+                    <i data-lucide="sparkles" class="w-4 h-4"></i>
+                </div>
+                <div class="bg-white border border-slate-100 py-3 px-4 rounded-2xl rounded-tl-none shadow-sm flex items-center">
+                    <div class="typing-indicator"><span></span><span></span><span></span></div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="bg-white border-t border-slate-200/85 p-4">
+            <div class="max-w-4xl mx-auto">
+                <form id="chat-form" class="relative flex items-end gap-2">
+                    <div class="relative flex-1">
+                        <textarea id="user-input" rows="1"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-3xl py-3 pl-5 pr-12 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none transition-all duration-200 text-slate-800 text-sm"
+                            placeholder="Message Your Code..."
+                            style="min-height:48px;max-height:120px;"></textarea>
+                    </div>
+                    <button type="submit" id="send-btn"
+                        class="bg-indigo-600 hover:bg-indigo-700 text-white rounded-full w-12 h-12 flex items-center justify-center flex-shrink-0 transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i data-lucide="send-horizontal" class="w-5 h-5"></i>
+                    </button>
+                </form>
+                <p class="text-center text-[10px] text-slate-400 mt-2">Powered by Gemini & OpenRouter — Your Code.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- SETTINGS MODAL -->
+    <div id="settings-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center text-indigo-600">
+                        <i data-lucide="settings" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900">Workspace Settings</h2>
+                        <p class="text-xs text-slate-500">Configure your Your Code preferences</p>
+                    </div>
+                </div>
+                <button id="close-settings-btn" class="p-2 hover:bg-slate-200 text-slate-400 hover:text-slate-700 rounded-xl transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="flex-1 overflow-y-auto p-6 space-y-6">
+
+                <!-- Persona -->
+                <div class="space-y-4 border-t border-slate-100 pt-6">
+                    <h3 class="text-xs font-bold text-indigo-600 uppercase tracking-wider">AI Persona Instructions</h3>
+                    <div class="space-y-2">
+                        <label class="block text-xs font-semibold text-slate-600">System Prompt</label>
+                        <textarea id="system-instructions" rows="3" class="w-full text-xs p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none resize-none transition-all" placeholder="Tell the AI how to behave..."></textarea>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="applyPreset('code')" class="p-2.5 border border-slate-200 text-left rounded-xl text-xs hover:bg-slate-50 text-slate-700 font-semibold transition-colors">💻 Developer Persona</button>
+                        <button onclick="applyPreset('creative')" class="p-2.5 border border-slate-200 text-left rounded-xl text-xs hover:bg-slate-50 text-slate-700 font-semibold transition-colors">🎨 Creative Copywriter</button>
+                    </div>
+                </div>
+
+                <!-- TTS -->
+                <div class="space-y-4 border-t border-slate-100 pt-6">
+                    <h3 class="text-xs font-bold text-indigo-600 uppercase tracking-wider">Voice Synthesis (Browser TTS)</h3>
+                    <div class="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-100">
+                        <div>
+                            <p class="text-xs font-bold text-slate-700">Read Aloud Automatically</p>
+                            <p class="text-[10px] text-slate-500">Uses your browser's built-in speech engine</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="tts-toggle" class="sr-only peer">
+                            <div class="w-10 h-6 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                        </label>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-xs font-semibold text-slate-600">
+                            Speech Rate: <span id="tts-rate-label" class="text-indigo-600">1.0×</span>
+                        </label>
+                        <input type="range" id="tts-rate" min="0.5" max="2.0" step="0.1" value="1.0" class="w-full h-2 rounded-lg appearance-none cursor-pointer bg-slate-200">
+                        <div class="flex justify-between text-[10px] text-slate-400">
+                            <span>0.5× Slow</span><span>1.0× Normal</span><span>2.0× Fast</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cleanup -->
+                <div class="space-y-4 border-t border-slate-100 pt-6">
+                    <h3 class="text-xs font-bold text-indigo-600 uppercase tracking-wider">Diagnostic Clean-up</h3>
+                    <button onclick="clearCurrentWorkspace()" class="w-full p-3 bg-rose-50 hover:bg-rose-100 border border-rose-100 text-rose-700 rounded-xl text-xs font-bold transition-all">
+                        Purge Workspace Cache Memory
+                    </button>
+                </div>
+            </div>
+            <div class="p-4 border-t border-slate-100 flex justify-end bg-slate-50">
+                <button id="save-settings-btn" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md transition-all">Save & Apply</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- GEMINI WARNING MODAL -->
+    <div id="gemini-warning-modal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[70] flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl p-6 space-y-5 text-center">
+            <div class="w-16 h-16 mx-auto rounded-full bg-amber-100 flex items-center justify-center">
+                <svg class="w-8 h-8 text-amber-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+            </div>
+            <div>
+                <h3 class="text-lg font-extrabold text-slate-900">⚠️ Limited Usage</h3>
+                <p class="text-sm text-slate-600 mt-2 leading-relaxed">Gemini models are limited — please do not use them too much.</p>
+            </div>
+            <button id="close-gemini-warning-btn" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm shadow-md transition-all">I Understand</button>
+        </div>
+    </div>
+
+
+    <script>
+    // ============================================================
+    // CONFIG — API Keys & Endpoints
+    // ============================================================
+    const GEMINI_API_KEY = "AQ.Ab8RN6K6oxXEhlWDwfIsBPmQdo5VooCiP6_x29xscjkkn3bzaQ";
+
+    const OPENROUTER_API_KEY = "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";
+    const OPENROUTER_URL     = "https://openrouter.ai/api/v1/chat/completions";
+    const GEMINI_CHAT_URL_BASE = "https://generativelanguage.googleapis.com/v1/models";
+    const GEMINI_CHAT_URL_BASE_BETA = "https://generativelanguage.googleapis.com/v1beta/models";
+
+    const MODELS = {
+        'gemini-3-flash-preview':'gemini-3-flash-preview',
+        'gemini-2.5-flash':'gemini-2.5-flash',
+        'gemini-3.1-lite': 'gemini-3.1-flash-lite',
+    };
+
+    // OpenRouter free model IDs (OpenAI-compatible endpoint)
+    const OPENROUTER_MODELS = {
+        'or-gpt-oss-20b':          'gpt-oss/gpt-oss-20b:free',
+        'or-gpt-oss-120b':         'gpt-oss/gpt-oss-120b:free',
+        'or-qwen3-next':           'qwen/qwen3-next-80b-a3b-instruct:free',
+        'or-openrouter-free':      'openrouter/free',
+        'or-nemotron-ultra':       'nvidia/nemotron-3-ultra-550b-a55b:free',
+        'or-nemotron-nano':        'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
+        'or-nemotron-super':       'nvidia/nemotron-3-super-120b-a12b:free',
+        'or-gemma-4':              'google/gemma-4-26b-a4b-it:free',
+        'or-gemma-4-31b':          'google/gemma-4-31b-it:free',
+        'or-hermes-405b':          'nousresearch/hermes-3-llama-3.1-405b:free',
+        'or-lfm-thinking':         'liquid/lfm-2.5-1.2b-thinking:free',
+        'or-lfm-instruct':         'liquid/lfm-2.5-1.2b-instruct:free',
+        'or-north-mini-code':      'cohere/north-mini-code:free',
+        'or-llama-70b':            'meta-llama/llama-3.3-70b-instruct:free',
+        'or-poolside-laguna-xs2':  'poolside/laguna-xs.2:free',
+        'or-poolside-laguna-m1':   'poolside/laguna-m.1:free',
+        'or-nemotron-3-nano-30b-a3b': 'nvidia/nemotron-3-nano-30b-a3b:free',
+        'or-nemotron-embed-vl-1b-v2': 'nvidia/llama-nemotron-embed-vl-1b-v2:free',
+        'or-nemotron-nano-12b-v2-vl': 'nvidia/nemotron-nano-12b-v2-vl:free',
+        'or-nemotron-nano-9b-v2':  'nvidia/nemotron-nano-9b-v2:free',
+        'or-llama-3.2-3b-instruct':'meta-llama/llama-3.2-3b-instruct:free',
+    };
+
+    function isOpenRouterSelection(selectedModel) {
+        return !!(selectedModel && OPENROUTER_MODELS[selectedModel]);
+    }
+
+    // Gemini models (used to decide API routing)
+    const GEMINI_CHAT_KEYS = new Set(['gemini-3-flash-preview', 'gemini-2.5-flash', 'gemini-3.1-lite']);
+    // Known Gemini beta-only model ids (used to choose v1beta endpoints)
+    const BETA_GEMINI_MODELS = new Set([
+        'gemini-3.1-flash-lite',
+        'gemini-3.5-flash-preview',
+        'gemini-3-flash-preview'
+    ]);
+
+    function isGeminiSelection(selectedModel) {
+        if (!selectedModel) return false;
+        if (selectedModel.startsWith && selectedModel.startsWith('gemini-')) return true;
+        const mapped = MODELS[selectedModel];
+        return !!(mapped && String(mapped).toLowerCase().includes('gemini'));
+    }
+
+    function isGeminiBetaSelection(selectedModel) {
+        const mapped = MODELS[selectedModel];
+        return !!(mapped && BETA_GEMINI_MODELS.has(mapped));
+    }
+
+    // ============================================================
+    // Safe storage (falls back to in-memory when localStorage
+    // is blocked — e.g. sandboxed iframes in Google Sites)
+    // ============================================================
+    const safeStorage = (() => {
+        const mem = {};
+        return {
+            getItem(k)    { try { return localStorage.getItem(k); }    catch { return mem[k] ?? null; } },
+            setItem(k, v) { try { localStorage.setItem(k, v); }        catch { mem[k] = v; } },
+            removeItem(k) { try { localStorage.removeItem(k); }        catch { delete mem[k]; } }
+        };
+    })();
+
+    // Element refs
+    // ============================================================
+    const chatBox              = document.getElementById('chat-box');
+    const chatForm             = document.getElementById('chat-form');
+    const userInput            = document.getElementById('user-input');
+    const sendBtn              = document.getElementById('send-btn');
+    const loadingIndicator     = document.getElementById('loading-indicator');
+    const sidebar              = document.getElementById('sidebar');
+    const sidebarOverlay       = document.getElementById('sidebar-overlay');
+    const menuBtn              = document.getElementById('menu-btn');
+    const closeSidebarBtn      = document.getElementById('close-sidebar-btn');
+    const newChatBtn           = document.getElementById('new-chat-btn');
+    const historyList          = document.getElementById('history-list');
+    const modelSelector        = document.getElementById('model-selector');
+    const settingsToggleBtn    = document.getElementById('settings-toggle-btn');
+    const settingsModal        = document.getElementById('settings-modal');
+    const closeSettingsBtn     = document.getElementById('close-settings-btn');
+    const saveSettingsBtn      = document.getElementById('save-settings-btn');
+    const systemInstructions   = document.getElementById('system-instructions');
+    const ttsToggle            = document.getElementById('tts-toggle');
+    const ttsRate              = document.getElementById('tts-rate');
+    const ttsRateLabel         = document.getElementById('tts-rate-label');
+    const activeProviderLabel  = document.getElementById('active-provider-label');
+
+    // ============================================================
+    // App state
+    // ============================================================
+    let chatHistory = [];
+    try { chatHistory = JSON.parse(safeStorage.getItem('jrgg_chats')) || []; } catch { chatHistory = []; }
+
+    let currentChatId     = null;
+    let userDisplayName   = "Guest";
+
+    const defaultInstructions = "You are Low Code, a helpful and versatile assistant. Provide clear, well-formatted answers using Markdown when appropriate.";
+    systemInstructions.value = safeStorage.getItem('jrgg_persona') || defaultInstructions;
+
+    // ============================================================
+    // Model selector — update UI on change
+    // ============================================================
+    const geminiWarningModal = document.getElementById('gemini-warning-modal');
+    const closeGeminiWarningBtn = document.getElementById('close-gemini-warning-btn');
+
+    function showGeminiWarning() {
+        geminiWarningModal.classList.remove('hidden');
+    }
+
+    closeGeminiWarningBtn.addEventListener('click', () => {
+        geminiWarningModal.classList.add('hidden');
+    });
+
+    geminiWarningModal.addEventListener('click', (e) => {
+        if (e.target === geminiWarningModal) {
+            geminiWarningModal.classList.add('hidden');
+        }
+    });
+
+    function onModelChange() {
+        const selected = modelSelector.value;
+        const isGeminiChat = isGeminiSelection(selected);
+        const isGeminiBeta = isGeminiBetaSelection(selected);
+        const isOpenRouter = isOpenRouterSelection(selected);
+
+        userInput.placeholder = "Message Your Code...";
+
+        // Update provider label
+        if (isOpenRouter) {
+            const name = modelSelector.options[modelSelector.selectedIndex].text;
+            activeProviderLabel.textContent = `${name} — OpenRouter Free`;
+        } else if (isGeminiChat) {
+            const name = modelSelector.options[modelSelector.selectedIndex].text;
+            activeProviderLabel.textContent = `${name} — Gemini API${isGeminiBeta ? ' (beta)' : ''}`;
+            showGeminiWarning();
+        } else {
+            const name = modelSelector.options[modelSelector.selectedIndex].text;
+            activeProviderLabel.textContent = `${name}`;
+        }
+    }
+
+    modelSelector.addEventListener('change', onModelChange);
+    // Initial call
+    onModelChange();
+
+    // ============================================================
+    // Custom model dropdown (scrollable with many options)
+    // ============================================================
+    const dropdownBtn = document.getElementById('model-dropdown-btn');
+    const dropdownList = document.getElementById('model-dropdown-list');
+    const dropdownLabel = document.getElementById('model-dropdown-label');
+    const dropdownChevron = document.getElementById('model-dropdown-chevron');
+    const dropdownOptions = document.querySelectorAll('.model-option');
+
+    function updateDropdownLabel() {
+        const selected = modelSelector.options[modelSelector.selectedIndex];
+        if (selected) dropdownLabel.textContent = selected.text;
+    }
+
+    function closeDropdown() {
+        dropdownList.classList.add('hidden');
+        dropdownChevron.style.transform = 'rotate(0deg)';
+    }
+
+    function openDropdown() {
+        dropdownList.classList.remove('hidden');
+        dropdownChevron.style.transform = 'rotate(180deg)';
+    }
+
+    dropdownBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (dropdownList.classList.contains('hidden')) {
+            openDropdown();
+        } else {
+            closeDropdown();
+        }
+    });
+
+    // Add click listeners to dropdown options
+    dropdownOptions.forEach(option => {
+        option.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const value = option.getAttribute('data-value');
+            if (value) {
+                modelSelector.value = value;
+                onModelChange();
+                updateDropdownLabel();
+                closeDropdown();
+            }
+        });
+    });
+
+    // Close dropdown on outside click
+    document.addEventListener('click', (e) => {
+        const wrapper = document.getElementById('model-dropdown-wrapper');
+        if (wrapper && !wrapper.contains(e.target)) {
+            closeDropdown();
+        }
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeDropdown();
+        }
+    });
+
+    // Sync label on init
+    updateDropdownLabel();
+
+    // ============================================================
+    // Settings modal
+    // ============================================================
+    function applyPreset(type) {
+        if (type === 'code') systemInstructions.value = "You are a skilled Software Engineer. Respond with precise, clean code and clear step-by-step explanations. Prefer structured Markdown.";
+        if (type === 'creative') systemInstructions.value = "You are an imaginative storyteller and copywriter. Respond with vivid, engaging, and richly descriptive prose.";
+        safeStorage.setItem('jrgg_persona', systemInstructions.value);
+        settingsModal.classList.add('hidden');
+    }
+
+    settingsToggleBtn.addEventListener('click', () => settingsModal.classList.remove('hidden'));
+    closeSettingsBtn.addEventListener('click', () => settingsModal.classList.add('hidden'));
+    saveSettingsBtn.addEventListener('click', () => {
+        safeStorage.setItem('jrgg_persona', systemInstructions.value);
+        settingsModal.classList.add('hidden');
+    });
+
+    // ============================================================
+    // Sidebar / navigation
+    // ============================================================
+    function toggleSidebar() {
+        sidebar.classList.toggle('-translate-x-full');
+        sidebarOverlay.classList.toggle('hidden');
+    }
+    menuBtn.addEventListener('click', toggleSidebar);
+    closeSidebarBtn.addEventListener('click', toggleSidebar);
+    sidebarOverlay.addEventListener('click', toggleSidebar);
+    newChatBtn.addEventListener('click', () => { startNewChat(); if (window.innerWidth < 768) toggleSidebar(); });
+
+    function initApp() {
+        lucide.createIcons();
+        if (chatHistory.length === 0) startNewChat();
+        else loadChat(chatHistory[0].id);
+    }
+
+    function startNewChat() {
+        currentChatId = Date.now().toString();
+        chatHistory.unshift({ id: currentChatId, title: "New Chat", messages: [] });
+        saveChats(); renderChatArea(); renderHistoryList();
+        userInput.value = ''; userInput.style.height = '48px'; userInput.focus();
+    }
+
+    function loadChat(id) {
+        currentChatId = id;
+        renderChatArea(); renderHistoryList();
+        userInput.value = ''; userInput.style.height = '48px';
+    }
+
+    function saveChats() {
+        try { safeStorage.setItem('jrgg_chats', JSON.stringify(chatHistory)); } catch {}
+    }
+
+    function deleteChat(id, event) {
+        event.stopPropagation();
+        chatHistory = chatHistory.filter(c => c.id !== id);
+        saveChats();
+        if (currentChatId === id) { if (chatHistory.length > 0) loadChat(chatHistory[0].id); else startNewChat(); }
+        else renderHistoryList();
+    }
+
+    function renderHistoryList() {
+        historyList.innerHTML = '';
+        chatHistory.forEach(chat => {
+            const wrapper = document.createElement('div');
+            wrapper.className = `group flex items-center justify-between px-3 py-2 rounded-xl text-sm transition-all mb-1 cursor-pointer ${chat.id === currentChatId ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800/60'}`;
+            const btn = document.createElement('div');
+            btn.className = "flex-1 min-w-0 flex items-center gap-2";
+            btn.innerHTML = `<i data-lucide="message-square" class="w-4 h-4 text-indigo-400 flex-shrink-0"></i><span class="truncate font-medium text-xs">${chat.title || "New Chat"}</span>`;
+            btn.onclick = () => { loadChat(chat.id); if (window.innerWidth < 768) toggleSidebar(); };
+            const del = document.createElement('button');
+            del.className = "text-slate-500 hover:text-rose-400 p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity ml-1";
+            del.innerHTML = `<i data-lucide="trash-2" class="w-3.5 h-3.5"></i>`;
+            del.onclick = (e) => deleteChat(chat.id, e);
+            wrapper.appendChild(btn); wrapper.appendChild(del);
+            historyList.appendChild(wrapper);
+        });
+        lucide.createIcons();
+    }
+
+    function renderChatArea() {
+        chatBox.innerHTML = '';
+        const currentChat = chatHistory.find(c => c.id === currentChatId);
+
+        const welcome = document.createElement('div');
+        welcome.className = "flex gap-4 w-full max-w-3xl";
+        welcome.innerHTML = `
+            <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-500 flex-shrink-0 flex items-center justify-center text-white text-xs font-bold mt-1 shadow-sm">
+                <i data-lucide="sparkles" class="w-4 h-4"></i>
+            </div>
+            <div class="bg-white border border-slate-200/60 p-5 rounded-2xl rounded-tl-none shadow-sm text-slate-800 leading-relaxed text-sm">
+                <h3 class="font-extrabold text-slate-950 mb-1 text-base">Welcome to Your Code!</h3>
+                <p class="text-slate-600 mb-3">Multi-provider playground powered by <strong>Gemini</strong> and <strong>OpenRouter</strong>. Choose any model above and start chatting!</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4">
+                    <div class="p-3 bg-slate-50 border border-slate-100 rounded-xl cursor-pointer hover:bg-indigo-50/50 hover:border-indigo-100 transition-all text-left" onclick="fillInput('Write clean HTML and CSS for a modern login card with dark mode support')">
+                        <span class="text-xs font-semibold text-indigo-600 block">💻 Engineering Mode</span>
+                        <span class="text-[11px] text-slate-500">Build UI components or write code.</span>
+                    </div>
+                    <div class="p-3 bg-slate-50 border border-slate-100 rounded-xl cursor-pointer hover:bg-indigo-50/50 hover:border-indigo-100 transition-all text-left" onclick="fillInput('Explain how transformer neural networks work, using a creative analogy')">
+                        <span class="text-xs font-semibold text-indigo-600 block">🧠 Deep Explanations</span>
+                        <span class="text-[11px] text-slate-500">Understand any complex topic clearly.</span>
+                    </div>
+                </div>
+            </div>`;
+        chatBox.appendChild(welcome);
+
+        if (currentChat?.messages) {
+            currentChat.messages.forEach(msg => addMessageToUI(msg.text, msg.sender, false, msg.imageData, msg.generatedImage, msg.thoughts));
+        }
+        scrollToBottom(); lucide.createIcons();
+    }
+
+    function fillInput(text) {
+        userInput.value = text;
+        userInput.dispatchEvent(new Event('input'));
+        userInput.focus();
+    }
+
+    function clearCurrentWorkspace() {
+        if (confirm("Purge all chats in this session?")) {
+            safeStorage.removeItem('jrgg_chats');
+            chatHistory = []; startNewChat(); settingsModal.classList.add('hidden');
+        }
+    }
+
+    // ============================================================
+    // UI helpers
+    // ============================================================
+    userInput.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = this.scrollHeight + 'px';
+        if (!this.value.trim()) this.style.height = '48px';
+    });
+
+    userInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            if (this.value.trim()) chatForm.dispatchEvent(new Event('submit'));
+        }
+    });
+
+    function scrollToBottom() { chatBox.scrollTop = chatBox.scrollHeight; }
+
+    window.copyCode = function(btn) {
+        const code = btn.closest('pre').querySelector('code');
+        const ta = document.createElement('textarea');
+        ta.value = code.textContent; ta.style.position = 'fixed';
+        document.body.appendChild(ta); ta.focus(); ta.select();
+        try {
+            document.execCommand('copy');
+            btn.innerHTML = '<i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>';
+            lucide.createIcons();
+            setTimeout(() => { btn.innerHTML = '<i data-lucide="copy" class="w-4 h-4"></i>'; lucide.createIcons(); }, 2000);
+        } catch {}
+        document.body.removeChild(ta);
+    };
+
+    async function typeMessage(bubble, text) {
+        const words = text.split(' ');
+        let current = '';
+        bubble.classList.add('typing-caret');
+        for (let i = 0; i < words.length; i++) {
+            current += (i === 0 ? '' : ' ') + words[i];
+            bubble.innerHTML = DOMPurify.sanitize(marked.parse(current));
+            addCopyButtons(bubble); scrollToBottom();
+            await new Promise(r => setTimeout(r, 8 + Math.random() * 18));
+        }
+        bubble.classList.remove('typing-caret');
+    }
+
+    function addCopyButtons(el) {
+        el.querySelectorAll('pre').forEach(pre => {
+            if (pre.querySelector('.copy-btn')) return;
+            const btn = document.createElement('button');
+            btn.className = "copy-btn absolute top-2 right-2 p-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white transition-colors border border-slate-700/80";
+            btn.innerHTML = '<i data-lucide="copy" class="w-4 h-4"></i>';
+            btn.onclick = () => window.copyCode(btn);
+            pre.appendChild(btn);
+        });
+        lucide.createIcons();
+    }
+
+    // ============================================================
+    // Thinking section — collapsible display of model reasoning
+    // ============================================================
+    function addThinkingSection(bubble, thoughts) {
+        if (!thoughts || !thoughts.trim()) return;
+        const container = document.createElement('div');
+        container.className = 'thinking-section mb-3 border border-indigo-100 rounded-xl overflow-hidden';
+        const rawThoughts = DOMPurify.sanitize(marked.parse(thoughts));
+        container.innerHTML = `
+            <div class="thinking-toggle flex items-center gap-2 p-2.5 bg-indigo-50/70 cursor-pointer select-none hover:bg-indigo-100/50 transition-colors" onclick="this.parentElement.classList.toggle('thinking-open')">
+                <i data-lucide="brain" class="w-4 h-4 text-indigo-600 flex-shrink-0"></i>
+                <span class="text-[11px] font-bold text-indigo-700 uppercase tracking-wide">💭 Model Thinking</span>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-indigo-400 ml-auto thinking-chevron transition-transform duration-200 flex-shrink-0"></i>
+            </div>
+            <div class="thinking-content p-3 bg-indigo-50/40 border-t border-indigo-100 text-xs text-slate-600 leading-relaxed">${rawThoughts}</div>
+        `;
+        bubble.insertBefore(container, bubble.firstChild);
+        lucide.createIcons();
+    }
+
+    function addMessageToUI(text, sender, isNew = false, imageData = null, generatedImage = null, thoughts = null) {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `flex gap-4 w-full max-w-3xl ${sender === 'user' ? 'ml-auto flex-row-reverse' : ''}`;
+
+        const avatar = document.createElement('div');
+        avatar.className = `w-8 h-8 rounded-xl flex-shrink-0 flex items-center justify-center text-white text-xs font-bold mt-1 shadow-sm ${sender === 'user' ? 'bg-slate-800' : 'bg-gradient-to-tr from-indigo-600 to-purple-500'}`;
+        avatar.innerHTML = sender === 'user'
+            ? `<span class="uppercase">${userDisplayName.charAt(0)}</span>`
+            : '<i data-lucide="sparkles" class="w-4 h-4"></i>';
+
+        const wrap = document.createElement('div');
+        wrap.className = "flex flex-col gap-1.5 max-w-[85%]";
+
+        const bubble = document.createElement('div');
+        bubble.className = `p-4 rounded-2xl shadow-sm leading-relaxed text-sm ${
+            sender === 'user'
+                ? 'bg-slate-800 text-white rounded-tr-none'
+                : 'bg-white border border-slate-200/80 text-slate-800 rounded-tl-none markdown-body'
+        }`;
+
+        wrap.appendChild(bubble);
+        msgDiv.appendChild(avatar); msgDiv.appendChild(wrap);
+        chatBox.appendChild(msgDiv);
+
+        // Add thinking section before filling the bubble with text
+        if (sender === 'ai' && thoughts) {
+            addThinkingSection(bubble, thoughts);
+        }
+
+        if (sender === 'user') {
+            bubble.textContent = text;
+        } else if (isNew && !generatedImage) {
+            // Type out text responses
+            typeMessage(bubble, text);
+        } else {
+            bubble.innerHTML = DOMPurify.sanitize(marked.parse(text || ''));
+            addCopyButtons(bubble);
+        }
+
+        scrollToBottom(); lucide.createIcons();
+    }
+
+    // ============================================================
+    // Fetch helper
+    // ============================================================
+    async function fetchWithRetry(url, options, maxRetries = 4) {
+        let delay = 800;
+        for (let i = 0; i < maxRetries; i++) {
+            try {
+                const res = await fetch(url, options);
+                if (res.ok) return res;
+                if (res.status === 429 || res.status >= 500) {
+                    await new Promise(r => setTimeout(r, delay)); delay *= 2; continue;
+                }
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.error?.message || `HTTP ${res.status}`);
+            } catch (e) {
+                if (i === maxRetries - 1) throw e;
+                await new Promise(r => setTimeout(r, delay)); delay *= 2;
+            }
+        }
+        throw new Error("Max retries exceeded.");
+    }
+
+    // ============================================================
+    // Gemini Chat API
+    // ============================================================
+    async function runGeminiChat(userQuery, historyMessages, selectedModel) {
+        const modelId = MODELS[selectedModel];
+        if (!modelId) throw new Error(`Unknown Gemini model selection: ${selectedModel}`);
+
+        // Some Gemini models only work on v1beta endpoints.
+        const useBeta = BETA_GEMINI_MODELS.has(modelId);
+        const base = useBeta ? GEMINI_CHAT_URL_BASE_BETA : GEMINI_CHAT_URL_BASE;
+        const url = `${base}/${modelId}:generateContent?key=${GEMINI_API_KEY}`;
+
+        const contents = [];
+
+
+        const sys = systemInstructions.value || defaultInstructions;
+        const sysPrompt =
+            `${sys}\n\nThe user's name is "${userDisplayName}". Use it naturally in conversation.`;
+
+        // Inject system prompt as first instruction (works on all Gemini endpoints)
+        contents.push({
+            role: "user",
+            parts: [{ text: sysPrompt }]
+        });
+        contents.push({
+            role: "model",
+            parts: [{ text: "Understood. I will follow those instructions." }]
+        });
+
+        // Conversation history
+        for (const m of historyMessages) {
+            contents.push({
+                role: m.sender === "user" ? "user" : "model",
+                parts: [{ text: m.text || "" }]
+            });
+        }
+
+        // Current message
+        contents.push({
+            role: "user",
+            parts: [{ text: userQuery }]
+        });
+
+        const body = {
+            contents,
+            generationConfig: {
+                maxOutputTokens: 4096,
+                temperature: 0.7
+            }
+        };
+
+        let data;
+        try {
+            const res = await fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(body)
+            });
+            data = await res.json();
+
+            if (!res.ok || data.error) {
+                console.error("Gemini request failed", { selectedModel, modelId, url, status: res.status, data });
+                throw new Error(
+                    data.error?.message ||
+                    `Gemini API error (${res.status})`
+                );
+            }
+        } catch (err) {
+            console.error("Gemini request exception", { selectedModel, modelId, url, err, data });
+            throw err;
+        }
+
+
+        // Safety blocks
+        if (data.promptFeedback?.blockReason) {
+            throw new Error(
+                `Gemini blocked the request: ${data.promptFeedback.blockReason}`
+            );
+        }
+
+        const candidate = data.candidates?.[0];
+
+        if (!candidate) {
+            throw new Error("Gemini returned no candidates.");
+        }
+
+        if (
+            candidate.finishReason &&
+            candidate.finishReason !== "STOP" &&
+            candidate.finishReason !== "MAX_TOKENS"
+        ) {
+            if (candidate.safetyRatings?.some(r => r.blocked)) {
+                throw new Error(
+                    "Gemini blocked the response due to safety guidelines."
+                );
+            }
+        }
+
+        // Extract text and thinking parts separately
+        const parts = candidate.content?.parts || [];
+        let text = '';
+        let thoughts = '';
+
+        for (const part of parts) {
+            if (part.thought) {
+                thoughts += (part.text || '');
+            } else {
+                text += (part.text || '');
+            }
+        }
+
+        if (!text) {
+            // If no non-thought text found, use all text as fallback
+            text = parts.map(p => p.text || '').join('');
+        }
+
+        if (!text) {
+            throw new Error("Gemini returned empty content.");
+        }
+
+        return { text, thoughts };
+    }
+
+    // ============================================================
+    // OpenRouter API (OpenAI-compatible, free models)
+    // ============================================================
+    async function runOpenRouterChat(userQuery, historyMessages, selectedModel) {
+        const messages = [];
+
+        let sys = systemInstructions.value || defaultInstructions;
+        sys += `\n\nThe user's name is "${userDisplayName}". Use it naturally in conversation.`;
+        messages.push({ role: 'system', content: sys });
+
+        historyMessages.forEach(m => {
+            messages.push({ role: m.sender === 'user' ? 'user' : 'assistant', content: m.text || '' });
+        });
+
+        const modelId = OPENROUTER_MODELS[selectedModel];
+        if (!modelId) throw new Error(`Unknown OpenRouter model: ${selectedModel}`);
+
+        messages.push({ role: 'user', content: userQuery });
+
+        const res = await fetchWithRetry(OPENROUTER_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+                'HTTP-Referer': window.location.origin || 'https://lowcode.ai',
+                'X-Title': 'Your Code Playground'
+            },
+            body: JSON.stringify({ model: modelId, messages, max_tokens: 4096, temperature: 0.7 })
+        });
+
+        const data = await res.json();
+        if (data.error) throw new Error(data.error.message || 'OpenRouter API error');
+        const content = data.choices?.[0]?.message?.content;
+        if (!content) throw new Error('OpenRouter returned empty content.');
+
+        let thoughts = null;
+        if (data.choices?.[0]?.message?.reasoning_content) {
+            thoughts = data.choices[0].message.reasoning_content;
+        }
+
+        return { text: content, thoughts };
+    }
+
+    // ============================================================
+    // Browser TTS
+    // ============================================================
+    function runVoiceSynthesis(text) {
+        if (!('speechSynthesis' in window)) return;
+        window.speechSynthesis.cancel();
+        const clean = text.replace(/[*#`_\[\]()\-~>|]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 800);
+        if (!clean) return;
+        const utterance = new SpeechSynthesisUtterance(clean);
+        utterance.rate  = parseFloat(ttsRate.value) || 1.0;
+        utterance.pitch = 1.0;
+        utterance.volume = 1.0;
+        const speak = () => {
+            const voices = window.speechSynthesis.getVoices();
+            const pick = voices.find(v => v.lang.startsWith('en') && v.localService)
+                      || voices.find(v => v.lang.startsWith('en'))
+                      || voices[0];
+            if (pick) utterance.voice = pick;
+            window.speechSynthesis.speak(utterance);
+        };
+        window.speechSynthesis.getVoices().length > 0
+            ? speak()
+            : (window.speechSynthesis.onvoiceschanged = speak);
+    }
+
+    // ============================================================
+    // Submit handler
+    // ============================================================
+    chatForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const text = userInput.value.trim();
+        const selectedModel = modelSelector.value;
+
+        if (!text) return;
+
+        // Ensure chat workspace exists
+        let currentChat = chatHistory.find(c => c.id === currentChatId);
+        if (!currentChat) {
+            currentChatId = Date.now().toString();
+            currentChat = { id: currentChatId, title: text.substring(0, 28) || "New Chat", messages: [] };
+            chatHistory.unshift(currentChat); saveChats(); renderChatArea(); renderHistoryList();
+        } else if (currentChat.messages.length === 0 && text) {
+            currentChat.title = text.substring(0, 28) + (text.length > 28 ? '…' : '');
+            renderHistoryList();
+        }
+
+        userInput.value = ''; userInput.style.height = '48px';
+        userInput.disabled = true; sendBtn.disabled = true;
+        loadingIndicator.classList.remove('hidden'); scrollToBottom();
+
+        // Show user message
+        addMessageToUI(text, 'user');
+        currentChat.messages.push({ text, sender: 'user' });
+        saveChats();
+
+        try {
+            loadingIndicator.classList.remove('hidden');
+
+            if (isGeminiSelection(selectedModel)) {
+                // ---- GEMINI CHAT ----
+                const result = await runGeminiChat(
+                    text,
+                    currentChat.messages.slice(0, -1),
+                    selectedModel
+                );
+                loadingIndicator.classList.add('hidden');
+                addMessageToUI(result.text, 'ai', true, null, null, result.thoughts);
+                if (ttsToggle.checked) runVoiceSynthesis(result.text);
+                currentChat.messages.push({ text: result.text, sender: 'ai', thoughts: result.thoughts });
+                saveChats();
+
+            } else if (isOpenRouterSelection(selectedModel)) {
+                // ---- OPENROUTER CHAT ----
+                const result = await runOpenRouterChat(
+                    text,
+                    currentChat.messages.slice(0, -1),
+                    selectedModel
+                );
+                loadingIndicator.classList.add('hidden');
+                addMessageToUI(result.text, 'ai', true, null, null, result.thoughts);
+                if (ttsToggle.checked) runVoiceSynthesis(result.text);
+                currentChat.messages.push({ text: result.text, sender: 'ai', thoughts: result.thoughts });
+                saveChats();
+
+            } else {
+                throw new Error(`Unknown model selection: ${selectedModel}`);
+            }
+
+        } catch (err) {
+            loadingIndicator.classList.add('hidden');
+            addMessageToUI(`⚠️ **Error:** ${err.message}`, 'ai', false);
+        } finally {
+            userInput.disabled = false; sendBtn.disabled = false; userInput.focus();
+        }
+    });
+
+    // ============================================================
+    // Boot
+    // ============================================================
+    initApp();
+    </script>
+</body>
+</html>
